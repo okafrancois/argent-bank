@@ -7,7 +7,6 @@ export interface UserState {
         firstName: string | null;
         lastName: string | null;
     };
-    token: string | null;
     loading: boolean,
     error: string | null,
 }
@@ -19,7 +18,6 @@ const initialState: UserState = {
         firstName: null,
         lastName: null,
     },
-    token: localStorage.getItem("token") ?? null,
     loading: false,
     error: null,
 }

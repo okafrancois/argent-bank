@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import Layout from "../../components/layout/Layout";
 import './login.scss'
-import {Link, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {logUserIn} from "../../app/func";
 
@@ -11,17 +11,16 @@ const Login = () => {
     const navigate = useNavigate();
     const emailRef = React.useRef<HTMLInputElement>(null);
     const passwordRef = React.useRef<HTMLInputElement>(null);
+    const keepLoggedInRef = React.useRef<HTMLInputElement>(null);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const email = emailRef.current?.value;
         const password = passwordRef.current?.value;
+        const keepLoggedIn = keepLoggedInRef.current?.checked ?? false;
 
         if (email && password) {
-            logUserIn({
-                email,
-                password
-            }, dispatch)
+            logUserIn({email,password}, dispatch, keepLoggedIn)
         }
     }
 
@@ -46,7 +45,7 @@ const Login = () => {
                         <input type="password" id="password" ref={passwordRef}/>
                     </div>
                     <div className="input-remember">
-                        <input type="checkbox" id="remember-me"/>
+                        <input type="checkbox" id="remember-me" ref={keepLoggedInRef}/>
                         <label htmlFor="remember-me">Remember me</label>
                     </div>
                     <button className="sign-in-button" type={"submit"}>Sign In</button>

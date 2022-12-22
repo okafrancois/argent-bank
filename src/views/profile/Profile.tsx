@@ -1,26 +1,50 @@
-import React, {useEffect} from 'react';
+import React, {FormEvent, useEffect} from 'react';
 import Layout from "../../components/layout/Layout";
 import './profile.scss'
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useNavigate} from "react-router-dom";
-import {getUserData} from "../../app/func";
+import {editUserData} from "../../app/func";
 const Profile = () => {
-    const loggedIn = useAppSelector(state => state.auth.loggedIn)
-    const token = useAppSelector(state => state.auth.token)
-    const user = useAppSelector(state => state.user.data)
-    const loading = useAppSelector(state => state.user.loading)
     const dispatch = useAppDispatch()
     const navigate = useNavigate();
+
+    const loggedIn = useAppSelector(state => state.auth.loggedIn)
+    const user = useAppSelector(state => state.user.data)
+    const loading = useAppSelector(state => state.user.loading)
+
+    const [editMode, setEditMode] = React.useState(false)
+    const firstNameRef = React.useRef<HTMLInputElement>(null)
+    const lastNameRef = React.useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         if (!loggedIn) {
             navigate('/login')
         }
+    }, [loggedIn, navigate])
 
-        if (token && user.id === null) {
-            getUserData(token, dispatch)
+    const toggleEditMode = () => {
+        setEditMode(!editMode)
+    }
+
+    const handleEditModeToggle = (e: FormEvent) => {
+        e.preventDefault()
+        toggleEditMode()
+    }
+
+    const handleEditSubmit = (e: FormEvent) => {
+        e.preventDefault()
+
+        const firstName = firstNameRef.current?.value ? firstNameRef.current.value : user.firstName
+        const lastName = lastNameRef.current?.value ? lastNameRef.current.value : user.lastName
+
+        if (firstName && lastName) {
+            editUserData(
+                {firstName, lastName},
+                dispatch,
+                toggleEditMode
+            )
         }
-    }, [token])
+    }
 
     return (
         <Layout containerClass={"profile-view bg-dark"}>
@@ -32,7 +56,20 @@ const Profile = () => {
                 !loading && user && <>
                     <div className="header">
                         <h1>Welcome back<br/> {user.firstName} </h1>
-                        <button className="edit-button">Edit Name</button>
+                        {
+                            editMode &&
+                            <form className={"edit-form"} onSubmit={handleEditSubmit}>
+                                <div className="input-wrapper">
+                                    <input type="text" ref={firstNameRef} name="firstname" placeholder={user.firstName ?? ''}/>
+                                </div>
+                                <div className="input-wrapper">
+                                    <input type="text" ref={lastNameRef} name="lastname" placeholder={user.lastName ?? ''}/>
+                                </div>
+                                <button className="edit-button" type={"submit"}>Save</button>
+                                <button className="edit-button" onClick={handleEditModeToggle}>Cancel</button>
+                            </form>
+                        }
+                        { !editMode && <button className="edit-button" onClick={handleEditModeToggle}>Edit Name</button> }
                     </div>
                     <h2 className="sr-only">Accounts</h2>
                     <section className="account">

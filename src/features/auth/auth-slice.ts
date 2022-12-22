@@ -3,12 +3,14 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface UserState {
     token: string | null;
     loggedIn: boolean;
+    keepLoggedIn: boolean;
     loading: boolean;
     error: string | null;
 }
 
 const initialState: UserState = {
     token: localStorage.getItem("token") ?? null,
+    keepLoggedIn: localStorage.getItem("keepLoggedIn") === "true" ?? false,
     loggedIn: !!localStorage.getItem("token"),
     loading: false,
     error: null,
