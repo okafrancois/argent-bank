@@ -3,14 +3,17 @@ import Layout from "../../components/layout/Layout";
 import './profile.scss'
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useNavigate} from "react-router-dom";
-import {editUserData} from "../../app/func";
+import {editUserData, getUserTransactions} from "../../app/func";
+import AccountItem from "../../components/account-item/Account-item";
 const Profile = () => {
     const dispatch = useAppDispatch()
     const navigate = useNavigate();
 
     const loggedIn = useAppSelector(state => state.auth.loggedIn)
+    const token = useAppSelector(state => state.auth.token)
     const user = useAppSelector(state => state.user.data)
     const loading = useAppSelector(state => state.user.loading)
+    const userTransactions = useAppSelector(state => state.transactions.userTransaction)
 
     const [editMode, setEditMode] = React.useState(false)
     const firstNameRef = React.useRef<HTMLInputElement>(null)
@@ -19,6 +22,10 @@ const Profile = () => {
     useEffect(() => {
         if (!loggedIn) {
             navigate('/login')
+        }
+
+        if (user && token) {
+            getUserTransactions(token, dispatch)
         }
     }, [loggedIn, navigate])
 
@@ -71,37 +78,14 @@ const Profile = () => {
                         }
                         { !editMode && <button className="edit-button" onClick={handleEditModeToggle}>Edit Name</button> }
                     </div>
-                    <h2 className="sr-only">Accounts</h2>
-                    <section className="account">
-                        <div className="account-content-wrapper">
-                            <h3 className="account-title">Argent Bank Checking (x8349)</h3>
-                            <p className="account-amount">$2,082.79</p>
-                            <p className="account-amount-description">Available Balance</p>
-                        </div>
-                        <div className="account-content-wrapper cta">
-                            <button className="transaction-button">View transactions</button>
-                        </div>
-                    </section>
-                    <section className="account">
-                        <div className="account-content-wrapper">
-                            <h3 className="account-title">Argent Bank Savings (x6712)</h3>
-                            <p className="account-amount">$10,928.42</p>
-                            <p className="account-amount-description">Available Balance</p>
-                        </div>
-                        <div className="account-content-wrapper cta">
-                            <button className="transaction-button">View transactions</button>
-                        </div>
-                    </section>
-                    <section className="account">
-                        <div className="account-content-wrapper">
-                            <h3 className="account-title">Argent Bank Credit Card (x8349)</h3>
-                            <p className="account-amount">$184.30</p>
-                            <p className="account-amount-description">Current Balance</p>
-                        </div>
-                        <div className="account-content-wrapper cta">
-                            <button className="transaction-button">View transactions</button>
-                        </div>
-                    </section>
+                    <div className="accounts-listing">
+                        <h2 className="sr-only">Accounts</h2>
+                        {
+                            userTransactions && userTransactions.map((transaction, index) => {
+                              return <AccountItem key={index} transaction={transaction}/>
+                            })
+                        }
+                    </div>
                 </>
             }
         </Layout>

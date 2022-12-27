@@ -1,6 +1,8 @@
 import {loginSucceed, loginFailed, loginRequest, logout} from "../features/auth/auth-slice";
-import {getUserDataFailed, getUserDataSucceed} from "../features/user/user-slice";
+import {getUserDataFailed, getUserDataRequest, getUserDataSucceed} from "../features/user/user-slice";
 import {EditUserFunc, GetUserDataFunc, LogUserInFunc, LogUserOutFunc} from "./func-types";
+import {getUserTransactionsRequest, getUserTransactionsFailed, getUserTransactionsSucceed
+} from "../features/transactions/transactions-slice";
 
 export const logUserIn: LogUserInFunc = ({ email, password }, dispatch, keepLoggedIn) => {
     dispatch(loginRequest());
@@ -49,6 +51,8 @@ export const logUserOut: LogUserOutFunc = (dispatch) => {
     dispatch(logout());
 }
 export const getUserData: GetUserDataFunc = (token, dispatch) => {
+    dispatch(getUserDataRequest());
+
     const uri = `${import.meta.env.VITE_API_URL}/user/profile`;
 
     const myHeaders = new Headers({
@@ -66,13 +70,13 @@ export const getUserData: GetUserDataFunc = (token, dispatch) => {
         .then(response => response.json())
         .then(result => {
             if (result.body) {
-                const { id, email, firstName, lastName } = result.body;
+                const { email, firstName, lastName, balance } = result.body;
 
                 dispatch(getUserDataSucceed({
-                    id,
                     email,
                     firstName,
-                    lastName
+                    lastName,
+                    balance
                 }));
             } else {
                 dispatch(getUserDataFailed(result.message));
@@ -107,13 +111,13 @@ export const editUserData: EditUserFunc = (data, dispatch, resolveCallback) => {
         .then(response => response.json())
         .then(result => {
             if (result.body) {
-                const { id, email, firstName, lastName } = result.body;
+                const { email, firstName, lastName, balance } = result.body;
 
                 dispatch(getUserDataSucceed({
-                    id,
                     email,
                     firstName,
-                    lastName
+                    lastName,
+                    balance
                 }));
 
                 resolveCallback();
@@ -123,5 +127,35 @@ export const editUserData: EditUserFunc = (data, dispatch, resolveCallback) => {
         })
         .catch(error => {
             dispatch(getUserDataFailed(error));
+        })
+}
+export const getUserTransactions = (token: string, dispatch: (arg0: any) => void) => {
+    dispatch(getUserTransactionsRequest());
+    const uri = `${import.meta.env.VITE_API_URL}/user/transactions`;
+
+    const myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    fetch(uri, requestOptions)
+        .then(response => response.json())
+        .then(result => {
+            if (result.body) {
+                const data = result.body;
+
+                dispatch(getUserTransactionsSucceed(data));
+            } else {
+                dispatch(getUserTransactionsFailed(result.message));
+            }
+        })
+        .catch(error => {
+            dispatch(getUserTransactionsFailed(error));
         })
 }
