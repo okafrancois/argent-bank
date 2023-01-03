@@ -117,7 +117,7 @@ paths:
       tags:
         - User Module
       summary: Get user transactions
-      description: API for getting the login user transactions
+      description: API for getting all transactions for the logged in user
       parameters:
         - in: header
           name: Authorization
@@ -137,37 +137,6 @@ paths:
           description: Expired or Invalid Token
         '500':
           description: Internal Server Error
-    put:
-      responses:
-        '200':
-          description: Successfully updated user Accounts-listing
-          schema:
-            $ref: '#/definitions/UpdateTransactionsResponse'
-        '400':
-          description: Invalid Fields
-        '401':
-          description: Expired or Invalid Token
-        '500':
-          description: Internal Server Error
-      security:
-        - Bearer: []
-      tags:
-        - User Module
-      summary: Update a user transaction
-      description: API for updating a user transaction
-      parameters:
-        - in: header
-          name: Authorization
-          description: Attach Bearer JWT token
-          type: string
-          required: true
-        - in: body
-          name: body
-          description: Update user transaction attributes
-          required: true
-          schema:
-            $ref: '#/definitions/UpdateTransaction'
-  /user/transactions/new:
     post:
       tags:
         - User Module
@@ -198,8 +167,72 @@ paths:
           description: Expired or Invalid Token
         '500':
           description: Internal Server Error
-  /user/transactions/delete:
-    post:
+  /user/transactions/{id}:
+    get:
+      tags:
+        - User Module
+      summary: Get a user transaction details
+      description: API for getting a transaction details for the logged in user
+      parameters:
+        - in: path
+          name: id
+          description: The ID of the transaction to retrieve
+          type: string
+          required: true
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT token
+          type: string
+          required: true
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Successfully got user Accounts-listing
+          schema:
+            $ref: '#/definitions/UserTransactionDetailResponse'
+        '400':
+          description: Invalid Fields
+        '401':
+          description: Expired or Invalid Token
+        '500':
+          description: Internal Server Error
+    put:
+      responses:
+        '200':
+          description: Successfully updated user Accounts-listing
+          schema:
+            $ref: '#/definitions/UpdateTransactionsResponse'
+        '400':
+          description: Invalid Fields
+        '401':
+          description: Expired or Invalid Token
+        '500':
+          description: Internal Server Error
+      security:
+        - Bearer: [ ]
+      tags:
+        - User Module
+      summary: Update a user transaction
+      description: API for updating a user transaction
+      parameters:
+        - in: path
+          name: id
+          description: The ID of the transaction to update
+          type: string
+          required: true
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT token
+          type: string
+          required: true
+        - in: body
+          name: body
+          description: Update user transaction attributes
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTransaction'
+    delete:
       responses:
         '200':
           description: Successfully deleted user transaction
@@ -212,23 +245,22 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - Bearer: []
+        - Bearer: [ ]
       tags:
         - User Module
       summary: Delete a user transaction
       description: API for deleting a user transaction
       parameters:
+        - in: path
+          name: id
+          description: The ID of the transaction to delete
+          type: string
+          required: true
         - in: header
           name: Authorization
           description: Attach Bearer JWT token
           type: string
           required: true
-        - in: body
-          name: body
-          description: Delete user transaction attributes
-          required: true
-          schema:
-            $ref: '#/definitions/DeleteTransaction'
 securityDefinitions:
   Bearer:
     type: apiKey
@@ -283,7 +315,7 @@ definitions:
         type: string
       lastName:
         type: string
-  UserTransactionsResponse:
+  UserTransactionDetailResponse:
     items:
       type: object
       properties:
@@ -307,6 +339,22 @@ definitions:
           type: string
         "__v":
           type: number
+  UserTransactionsResponse:
+    items:
+      type: object
+      properties:
+        _id:
+          type: string
+        userId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number
+        newBalance:
+          type: number
   NewTransaction:
     type: object
     properties:
@@ -325,8 +373,6 @@ definitions:
   UpdateTransaction:
     type: object
     properties:
-      _id:
-        type: string
       category:
         type: string
       notes:
